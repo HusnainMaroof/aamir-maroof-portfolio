@@ -1,9 +1,13 @@
-import Redirect from "./components/Redirect";
+import HeroSection from "./components/HeroScetion";
+import Navigation from "./components/NavBar";
+import Scroll from "./components/Scroll";
 
 const page = () => {
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <Redirect />
+    <div className="w-full bg-neutral-950">
+      <Navigation />
+      <HeroSection />
+      <Scroll />
     </div>
   );
 };
