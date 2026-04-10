@@ -2,116 +2,114 @@
 
 import React, { useState, useEffect } from "react";
 import { Heart, Grid, X, Film, Play } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 
-// --- MOCK DATA FOR PROFESSIONAL PROFILE ---
-const PROFILE_USER = {
-  username: "ELEVATED.",
-  subtitle: "Visual Identity & Motion",
-  avatar:
-    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=256&auto=format&fit=crop", // Abstract geometric brand logo
+// --- TYPES ---
+type Post = {
+  id: number;
+  type: "image" | "video";
+  src: string;
+  likes: string;
+  caption: string;
 };
 
-const PROFILE_POSTS = [
+// --- MOCK DATA ---
+const PROFILE_USER = {
+  username: "ace money transfer",
+
+  avatar: "/photos/logo.svg",
+};
+
+const POSTS: Post[] = [
   {
     id: 1,
-    image:
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=800&auto=format&fit=crop",
+    type: "image",
+    src: "/photos/img1.png",
     likes: "4.2k",
-    caption:
-      "Clean lines and natural light. Our latest residential project in the heart of the city. 🏛️✨ #architecture #minimalism",
+    caption: "Clean lines and natural light. 🏛️✨ #architecture",
   },
   {
     id: 2,
-    image:
-      "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop",
+    type: "image",
+    src: "/photos/img2.png",
     likes: "3.8k",
-    caption:
-      "Interior details that matter. Less is always more. 🛋️ #interiordesign",
+    caption: "Interior details that matter. 🛋️",
   },
   {
     id: 3,
-    image:
-      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=800&auto=format&fit=crop",
+    type: "image",
+    src: "/photos/img3.jpeg",
     likes: "5.1k",
     caption: "Concrete and wood textures blending seamlessly.",
   },
   {
     id: 4,
-    image:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop",
-    likes: "2.9k",
-    caption: "Corporate headquarters concept.",
+    type: "image",
+    src: "/photos/img4.png",
+    likes: "5.1k",
+    caption: "Concrete and wood textures blending seamlessly.",
   },
   {
     id: 5,
-    image:
-      "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800&auto=format&fit=crop",
-    likes: "6.4k",
-    caption: "Open workspaces encouraging collaboration. 📐",
+    type: "image",
+    src: "/photos/img5.webp",
+    likes: "5.1k",
+    caption: "Concrete and wood textures blending seamlessly.",
   },
   {
     id: 6,
-    image:
-      "https://images.unsplash.com/photo-1545042746-81e5912411e7?q=80&w=800&auto=format&fit=crop",
-    likes: "1.2k",
-    caption: "Monochrome living spaces.",
+    type: "image",
+    src: "/photos/img6.webp",
+    likes: "5.1k",
+    caption: "Concrete and wood textures blending seamlessly.",
   },
   {
     id: 7,
-    image:
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800&auto=format&fit=crop",
-    likes: "8.7k",
-    caption: "Modern exterior facade.",
+    type: "video",
+    src: "/videos/AMT IS.mp4",
+    likes: "5.1k",
+    caption: "Vertical motion study - Abstract flows.",
   },
   {
     id: 8,
-    image:
-      "https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=800&auto=format&fit=crop",
-    likes: "3.4k",
-    caption: "Natural lighting at its finest.",
-  },
-  {
-    id: 9,
-    image:
-      "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?q=80&w=800&auto=format&fit=crop",
-    likes: "4.9k",
-    caption: "The power of simplicity.",
+    type: "video",
+    src: "/videos/AMT L.mp4",
+    likes: "5.1k",
+    caption: "Vertical motion study - Abstract flows.",
   },
 ];
 
+// Strictly typed easing curve to fix TS number[] inference error
+const customEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
 export default function ProfilePage() {
-  const [selectedPost, setSelectedPost] = useState<
-    (typeof PROFILE_POSTS)[0] | null
-  >(null);
-  const [activeTab, setActiveTab] = useState("thumbnails");
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [activeTab, setActiveTab] = useState<"thumbnails" | "motion">(
+    "thumbnails",
+  );
   const [motionResolution, setMotionResolution] = useState<
     "1080x1920" | "1920x1080"
   >("1080x1920");
 
-  // Handle escape key to close modal
+  // --- HANDLERS ---
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") setSelectedPost(null);
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // Prevent scrolling on body when modal is open
   useEffect(() => {
-    if (selectedPost) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
+    document.body.style.overflow = selectedPost ? "hidden" : "unset";
   }, [selectedPost]);
 
-  // Animation Variants
-  const staggerContainer = {
+  // --- FILTERS ---
+  const imagePosts = POSTS.filter((p) => p.type === "image");
+  const videoPosts = POSTS.filter((p) => p.type === "video");
+
+  // --- ANIMATION VARIANTS ---
+  const staggerContainer: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -119,7 +117,7 @@ export default function ProfilePage() {
     },
   };
 
-  const gridItem = {
+  const gridItem: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: {
       opacity: 1,
@@ -128,13 +126,13 @@ export default function ProfilePage() {
     },
   };
 
-  const tabContentVariants = {
+  const tabContentVariants: Variants = {
     initial: { opacity: 0, y: 10, filter: "blur(4px)" },
     animate: {
       opacity: 1,
       y: 0,
       filter: "blur(0px)",
-      transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+      transition: { duration: 0.6, ease: customEase },
     },
     exit: {
       opacity: 0,
@@ -146,42 +144,35 @@ export default function ProfilePage() {
 
   return (
     <div className="bg-black min-h-screen text-neutral-200 font-sans antialiased selection:bg-neutral-800">
-      {/* MAIN PROFILE CONTAINER */}
-      <main className="w-full max-w-[935px] mx-auto pt-8 md:pt-16 pb-20 px-4 md:px-0">
-        {/* HEADER SECTION - LOGO AND NAME SIDE BY SIDE */}
+      <main className="w-full max-w-[935px] mx-auto pt-10 md:pt-16 pb-20 px-4 md:px-0">
+        {/* HEADER */}
         <motion.header
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col md:flex-row items-center md:items-center gap-6 md:gap-12 mb-12 md:mb-20 md:pl-8"
+          transition={{ duration: 0.8, ease: customEase }}
+          className="flex flex-col md:flex-row items-center md:items-center gap-6 md:gap-12 mb-12 md:mb-20 md:pl-8 text-center md:text-left"
         >
-          {/* Avatar / Brand Logo */}
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className="w-[110px] h-[110px] md:w-[150px] md:h-[150px] shrink-0 rounded-full border border-neutral-800 p-1 cursor-pointer transition-transform duration-500"
+            className="w-[100px] h-[100px] md:w-[130px] md:h-[130px] shrink-0 rounded-full border border-neutral-800 p-1 cursor-pointer transition-transform duration-500"
           >
-            <div className="w-full h-full rounded-full overflow-hidden bg-neutral-900">
-              {/* Note: Using standard img tag. For Next.js image optimization, use next/image and configure external domains in next.config.js */}
+            <div className="w-full h-full rounded-full overflow-hidden bg-red-[#C4161C] ">
               <img
                 src={PROFILE_USER.avatar}
                 alt={`${PROFILE_USER.username} Logo`}
-                className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity"
+                className="w-full h-full object-fit opacity-90 hover:opacity-100 transition-opacity"
               />
             </div>
           </motion.div>
 
-          {/* User Info / Brand Name */}
           <div className="flex flex-col items-center md:items-start w-full">
-            <h1 className="text-3xl md:text-5xl font-light text-white tracking-[0.2em] uppercase cursor-default">
+            <h1 className="text-3xl md:text-4xl font-light text-white tracking-[0.2em]  cursor-default">
               {PROFILE_USER.username}
             </h1>
-            <p className="mt-3 md:mt-4 text-neutral-500 text-[10px] md:text-xs tracking-[0.4em] font-light uppercase cursor-default">
-              {PROFILE_USER.subtitle}
-            </p>
           </div>
         </motion.header>
 
-        {/* TABS - TWO BUTTONS */}
+        {/* TABS */}
         <div className="flex justify-center border-t border-neutral-900 gap-12 md:gap-32">
           <button
             onClick={() => setActiveTab("thumbnails")}
@@ -191,27 +182,25 @@ export default function ProfilePage() {
               size={14}
               strokeWidth={activeTab === "thumbnails" ? 2 : 1.5}
             />{" "}
-            THUMBNAILS
+            Thumbnails
           </button>
           <button
-            onClick={() => setActiveTab("motion-graphics")}
-            className={`flex items-center gap-3 py-6 border-t cursor-pointer focus:outline-none ${activeTab === "motion-graphics" ? "border-white text-white" : "border-transparent text-neutral-600 hover:text-neutral-300"} text-[11px] md:text-[12px] font-medium tracking-[0.25em] -mt-[1px] transition-all duration-300`}
+            onClick={() => setActiveTab("motion")}
+            className={`flex items-center gap-3 py-6 border-t cursor-pointer focus:outline-none ${activeTab === "motion" ? "border-white text-white" : "border-transparent text-neutral-600 hover:text-neutral-300"} text-[11px] md:text-[12px] font-medium tracking-[0.25em] -mt-[1px] transition-all duration-300`}
           >
-            <Film
-              size={14}
-              strokeWidth={activeTab === "motion-graphics" ? 2 : 1.5}
-            />{" "}
-            MOTION GRAPHICS
+            <Film size={14} strokeWidth={activeTab === "motion" ? 2 : 1.5} />{" "}
+            Motions Ghraphic
           </button>
         </div>
 
-        {/* TAB CONTENT WITH ANIMATE PRESENCE */}
+        {/* TAB CONTENT */}
         <div className="mt-4 md:mt-8 min-h-[400px]">
           <AnimatePresence mode="wait">
-            {/* THUMBNAILS GRID */}
+            {/* THUMBNAILS (IMAGES) */}
             {activeTab === "thumbnails" && (
               <motion.div
-                key="thumbnails"
+                key="images"
+                variants={tabContentVariants}
                 initial="initial"
                 animate="animate"
                 exit="exit"
@@ -222,20 +211,20 @@ export default function ProfilePage() {
                   animate="show"
                   className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4"
                 >
-                  {PROFILE_POSTS.map((post) => (
+                  {imagePosts.map((post) => (
                     <motion.div
                       key={post.id}
-                      className="aspect-square bg-neutral-900 relative group cursor-pointer overflow-hidden rounded-xl"
+                      variants={gridItem}
+                      // Changed from aspect-square to aspect-[9/16] to enforce 1080x1920 ratio
+                      className="aspect-[9/16] bg-neutral-900 relative group cursor-pointer overflow-hidden rounded-xl"
                       onClick={() => setSelectedPost(post)}
                     >
                       <motion.img
                         whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                        src={post.image}
-                        alt="Project thumbnail"
+                        transition={{ duration: 0.7, ease: customEase }}
+                        src={post.src}
                         className="w-full h-full object-cover"
                       />
-
                       {/* Hover Overlay */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-center items-center gap-6">
                         <div className="flex items-center gap-2 text-white font-medium tracking-wide transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
@@ -248,16 +237,17 @@ export default function ProfilePage() {
               </motion.div>
             )}
 
-            {/* MOTION GRAPHICS GRID */}
-            {activeTab === "motion-graphics" && (
+            {/* MOTION (VIDEOS) */}
+            {activeTab === "motion" && (
               <motion.div
-                key="motion-graphics"
+                key="videos"
+                variants={tabContentVariants}
                 initial="initial"
                 animate="animate"
                 exit="exit"
                 className="flex flex-col"
               >
-                {/* SUB-NAVIGATION FOR RESOLUTIONS */}
+                {/* RESOLUTION SWITCH */}
                 <div className="flex justify-center gap-8 md:gap-16 mb-8 md:mb-12">
                   <button
                     onClick={() => setMotionResolution("1080x1920")}
@@ -279,25 +269,30 @@ export default function ProfilePage() {
                   animate="show"
                   className={`grid gap-2 md:gap-4 transition-all duration-500 ${motionResolution === "1080x1920" ? "grid-cols-2 md:grid-cols-3" : "grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto w-full"}`}
                 >
-                  {/* Sliced to show fewer items as if they are separate videos */}
-                  {PROFILE_POSTS.slice(
-                    0,
-                    motionResolution === "1080x1920" ? 6 : 4,
-                  ).map((post) => (
+                  {videoPosts.length === 0 && (
+                    <div className="col-span-full py-12 text-center text-neutral-600 tracking-widest text-sm uppercase">
+                      No projects found for this resolution.
+                    </div>
+                  )}
+                  {videoPosts.map((post) => (
                     <motion.div
                       key={post.id}
+                      variants={gridItem}
                       className={`${motionResolution === "1080x1920" ? "aspect-[9/16]" : "aspect-video"} bg-neutral-900 relative group cursor-pointer overflow-hidden rounded-xl transition-all duration-500`}
                       onClick={() => setSelectedPost(post)}
                     >
-                      <motion.img
+                      <motion.video
                         whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                        src={post.image}
-                        alt="Motion Graphic"
+                        transition={{ duration: 0.7, ease: customEase }}
+                        src={post.src}
+                        muted
+                        loop
+                        playsInline
+                        autoPlay
                         className="w-full h-full object-cover opacity-70 group-hover:opacity-90"
                       />
 
-                      {/* Always-on Frosted Play Icon */}
+                      {/* Frosted Play Icon Overlay */}
                       <div className="absolute inset-0 flex justify-center items-center pointer-events-none transition-transform duration-500 group-hover:scale-110">
                         <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-black/30 backdrop-blur-md flex justify-center items-center border border-white/20 text-white shadow-xl">
                           <Play className="ml-1 fill-white" size={24} />
@@ -312,7 +307,7 @@ export default function ProfilePage() {
         </div>
       </main>
 
-      {/* IMMERSIVE PROJECT MODAL */}
+      {/* MODAL */}
       <AnimatePresence>
         {selectedPost && (
           <motion.div
@@ -320,10 +315,10 @@ export default function ProfilePage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            onClick={() => setSelectedPost(null)}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4 md:p-10 backdrop-blur-md"
+            onClick={() => setSelectedPost(null)}
           >
-            {/* Minimal Close Button */}
+            {/* Close Button */}
             <button
               className="absolute top-6 right-6 md:top-10 md:right-10 text-neutral-500 hover:text-white transition-colors z-50 cursor-pointer focus:outline-none"
               onClick={() => setSelectedPost(null)}
@@ -331,7 +326,7 @@ export default function ProfilePage() {
               <X size={36} strokeWidth={1} />
             </button>
 
-            {/* Modal Content - Pure Focus on Project */}
+            {/* Modal Content */}
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -341,24 +336,20 @@ export default function ProfilePage() {
               className="w-full max-w-[1200px] flex flex-col items-center justify-center cursor-default"
             >
               <div className="relative flex items-center justify-center w-full max-h-[75vh]">
-                <img
-                  src={selectedPost.image}
-                  alt="Project Details"
-                  className="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl"
-                />
-              </div>
-
-              {/* Minimalist Caption Box */}
-              <div className="mt-8 md:mt-12 max-w-2xl text-center px-4">
-                <p className="text-white text-sm md:text-base font-light tracking-wide leading-relaxed">
-                  {selectedPost.caption}
-                </p>
-                <div className="flex items-center justify-center gap-2 mt-6 text-neutral-500">
-                  <Heart size={14} className="fill-neutral-500" />
-                  <span className="text-xs uppercase tracking-widest">
-                    {selectedPost.likes}
-                  </span>
-                </div>
+                {selectedPost.type === "video" ? (
+                  <video
+                    src={selectedPost.src}
+                    controls
+                    autoPlay
+                    className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl"
+                  />
+                ) : (
+                  <img
+                    src={selectedPost.src}
+                    alt="Project Details"
+                    className="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl"
+                  />
+                )}
               </div>
             </motion.div>
           </motion.div>
