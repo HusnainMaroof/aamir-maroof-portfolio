@@ -13,7 +13,6 @@ import { Post } from "../StaticData/data";
 
 // --- TYPES ---
 
-
 const customEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const RESOLUTIONS = ["1080x1920", "1920x1080"] as const;
 type Resolution = (typeof RESOLUTIONS)[number];
@@ -31,8 +30,11 @@ const Projects = () => {
   const projectName = activeProject?.projectName;
 
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const [activeTab, setActiveTab] = useState<"thumbnails" | "motion">("thumbnails");
-  const [motionResolution, setMotionResolution] = useState<Resolution>("1080x1920");
+  const [activeTab, setActiveTab] = useState<"thumbnails" | "motion">(
+    "thumbnails",
+  );
+  const [motionResolution, setMotionResolution] =
+    useState<Resolution>("1080x1920");
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -52,7 +54,7 @@ const Projects = () => {
   const logo = posts.find((p) => p.category === "logo");
   const imagePosts = posts.filter((p) => p.category === "thumbnail");
   const videoPosts = posts.filter(
-    (p) => p.category === "motion" && p.res === motionResolution
+    (p) => p.category === "motion" && p.res === motionResolution,
   );
 
   const tabContentVariants = {
@@ -81,10 +83,13 @@ const Projects = () => {
     <div className="bg-[#050505] min-h-screen text-neutral-200 font-sans antialiased selection:bg-red-500/30">
       <main className="w-full max-w-[935px] mx-auto pt-10 md:pt-16 pb-20 px-4 md:px-0">
         {/* HEADER */}
-        <a href="/project" className="text-white text-xl underline cursor-pointer mb-8 inline-block">
-          Back
-        </a>
-        
+        <Link href={"/project"}>
+          {" "}
+          <span className="text-white text-xl underline cursor-pointer mb-8 inline-block">
+            Back
+          </span>
+        </Link>
+
         <motion.header
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -173,7 +178,7 @@ const Projects = () => {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
                           <span className="text-[9px] font-black uppercase tracking-widest text-red-500 mb-1">
-                            {post.res?.replace('x', ' × ') || "VIEW"}
+                            {post.res?.replace("x", " × ") || "VIEW"}
                           </span>
                         </div>
                       </motion.div>
@@ -236,10 +241,7 @@ const Projects = () => {
                           />
                           <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
                             <div className="w-16 h-16 rounded-full bg-black/50 backdrop-blur-md flex justify-center items-center border border-white/10 text-white shadow-2xl group-hover:bg-red-600/20 group-hover:border-red-500/40 transition-all duration-500">
-                              <Play
-                                className="ml-1 fill-white"
-                                size={24}
-                              />
+                              <Play className="ml-1 fill-white" size={24} />
                             </div>
                           </div>
                         </motion.div>
